@@ -6,7 +6,8 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 def haberleri_getir():
-    url = "https://news.google.com/rss/search?q=Beylikdüzü&hl=tr&gl=TR&ceid=TR:tr"
+    # 'when:1d' filtresi sayesinde sadece son 24 saat içinde çıkan haberler çekilir
+    url = "https://news.google.com/rss/search?q=Beylikdüzü+when:1d&hl=tr&gl=TR&ceid=TR:tr"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, features="xml")
     
