@@ -29,7 +29,7 @@ def haberi_formatla(ham_haber):
     Ham Haber: {ham_haber}
     """
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-3.6-flash',
         contents=prompt
     )
     return response.text
