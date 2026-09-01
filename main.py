@@ -10,11 +10,18 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 def haberleri_getir():
-    url = "https://news.google.com/rss/search?q=Beylikdüzü+haber&hl=tr&gl=TR&ceid=TR:tr"
+    # Arama sorgusunu biraz daha genel tutarak sonuç alınmasını garantileyelim
+    url = "https://news.google.com/rss/search?q=Beylikdüzü&hl=tr&gl=TR&ceid=TR:tr"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, features="xml")
     
-    ilk_haber = soup.find_all('item')[0]
+    haberler = soup.find_all('item')
+    
+    # Liste boş mu diye kontrol ediyoruz (hata önleyici)
+    if not haberler:
+        return None
+        
+    ilk_haber = haberler[0]
     baslik = ilk_haber.title.text
     link = ilk_haber.link.text
     
@@ -45,8 +52,11 @@ def telegrama_gonder(mesaj):
 if __name__ == "__main__":
     try:
         ham_veri = haberleri_getir()
-        ig_metni = haberi_formatla(ham_veri)
-        son_mesaj = f"🚨 YENİ BEYLİKDÜZÜ HABERİ!\n\n{ig_metni}\n\n(Doğrudan şablona yapıştırabilirsin)"
-        telegrama_gonder(son_mesaj)
+        if ham_veri:
+            ig_metni = haberi_formatla(ham_veri)
+            son_mesaj = f"🚨 YENİ BEYLİKDÜZÜ HABERİ!\n\n{ig_metni}\n\n(Doğrudan şablona yapıştırabilirsin)"
+            telegrama_gonder(son_mesaj)
+        else:
+            print("Şu an yeni haber bulunamadı.")
     except Exception as e:
         print(f"Hata: {e}")
