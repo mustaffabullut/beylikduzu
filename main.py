@@ -7,7 +7,6 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# Yeni Google GenAI istemcisi
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 def haberleri_getir():
@@ -15,7 +14,6 @@ def haberleri_getir():
     response = requests.get(url)
     soup = BeautifulSoup(response.content, features="xml")
     
-    # findAll yerine find_all kullanıldı (Uyarıyı gidermek için)
     ilk_haber = soup.find_all('item')[0]
     baslik = ilk_haber.title.text
     link = ilk_haber.link.text
@@ -31,7 +29,7 @@ def haberi_formatla(ham_haber):
     Ham Haber: {ham_haber}
     """
     response = client.models.generate_content(
-        model='gemini-1.5-flash',
+        model='gemini-2.5-flash',
         contents=prompt
     )
     return response.text
