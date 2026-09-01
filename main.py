@@ -1,21 +1,22 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-import google.generativeai as genai
+from google import genai
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Yeni Google GenAI istemcisi
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 def haberleri_getir():
     url = "https://news.google.com/rss/search?q=Beylikdüzü+haber&hl=tr&gl=TR&ceid=TR:tr"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, features="xml")
     
-    ilk_haber = soup.findAll('item')[0]
+    # findAll yerine find_all kullanıldı (Uyarıyı gidermek için)
+    ilk_haber = soup.find_all('item')[0]
     baslik = ilk_haber.title.text
     link = ilk_haber.link.text
     
@@ -29,7 +30,10 @@ def haberi_formatla(ham_haber):
     
     Ham Haber: {ham_haber}
     """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-1.5-flash',
+        contents=prompt
+    )
     return response.text
 
 def telegrama_gonder(mesaj):
