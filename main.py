@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from bs4 import BeautifulSoup
 from google import genai
@@ -10,14 +11,11 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 def haberleri_getir():
-    # Arama sorgusunu biraz daha genel tutarak sonuç alınmasını garantileyelim
     url = "https://news.google.com/rss/search?q=Beylikdüzü&hl=tr&gl=TR&ceid=TR:tr"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, features="xml")
     
     haberler = soup.find_all('item')
-    
-    # Liste boş mu diye kontrol ediyoruz (hata önleyici)
     if not haberler:
         return None
         
@@ -35,11 +33,19 @@ def haberi_formatla(ham_haber):
     
     Ham Haber: {ham_haber}
     """
-    response = client.models.generate_content(
-        model='gemini-3.6-flash',
-        contents=prompt
-    )
-    return response.text
+    
+    # Yoğunluk anlarında hata almamak için 3 kez deneme döngüsü
+    for _ in range(3):
+        try:
+            response = client.models.generate_content(
+                model='gemini-1.5-flash',
+                contents=prompt
+            )
+            return response.text
+        except Exception:
+            time.sleep(2) # 2 saniye bekleyip tekrar dener
+            
+    raise Exception("Model yoğunluk nedeniyle yanıt vermedi.")
 
 def telegrama_gonder(mesaj):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
