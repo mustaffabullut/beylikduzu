@@ -34,18 +34,16 @@ def haberi_formatla(ham_haber):
     Ham Haber: {ham_haber}
     """
     
-    # Yoğunluk anlarında hata almamak için 3 kez deneme döngüsü
     for _ in range(3):
         try:
-            response = client.models.generate_content(
-                model='gemini-1.5-flash',
-                contents=prompt
-            )
+            # Doğrudan chat servisi üzerinden istek atarak AFC uyarılarını ve kilitlenmeleri aşıyoruz
+            chat = client.chats.create(model='gemini-1.5-flash')
+            response = chat.send_message(prompt)
             return response.text
         except Exception:
-            time.sleep(2) # 2 saniye bekleyip tekrar dener
+            time.sleep(3)
             
-    raise Exception("Model yoğunluk nedeniyle yanıt vermedi.")
+    raise Exception("Model yanıt vermedi.")
 
 def telegrama_gonder(mesaj):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
